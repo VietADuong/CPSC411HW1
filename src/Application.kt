@@ -25,24 +25,25 @@ fun Application.module(testing: Boolean = false) {
     routing {
         ///ClaimService/getAll on GET
         get("/ClaimService/getAll"){
-            val cList = ClaimDao().getAll()
-            println("The number of claims : ${cList.size}")
+            val claimList = ClaimDao().getAll()
+            println("The number of claims : ${claimList.size}")
             // JSON Serialization/Deserialization
-            val respJsonStr = Gson().toJson(cList)
+            val respJsonStr = Gson().toJson(claimList)
             println("HTTP message is using GET method with /getAll")
             call.respondText(respJsonStr, status= HttpStatusCode.OK, contentType= ContentType.Application.Json)
         }
         ///ClaimService/add on POST
         this.post("/ClaimService/add"){
-            //val contType = call.request.contentType()
+
             val data = call.request.receiveChannel()
             val dataLength = data.availableForRead
             var output = ByteArray(dataLength)
             data.readAvailable(output)
             val str1 = String(output)
             // JSON serialization/deserialization // GSON (Google Library)
-            var gsonOfString = Gson().fromJson(str1, ClaimEntity::class.java)
-            val cObj = ClaimEntity(UUID.randomUUID(), gsonOfString.title, gsonOfString.date, isSolved = false)
+            var gsStr = Gson().fromJson(str1, ClaimEntity::class.java)
+            var cObj : ClaimEntity
+            cObj = ClaimEntity(UUID.randomUUID(), gsStr.title, gsStr.date, isSolved = false)
             ClaimDao().addClaim(cObj)
             println("HTTP message is using POST method with /add ")
             call.respondText("The POST request was successfully processed. ",
@@ -50,4 +51,3 @@ fun Application.module(testing: Boolean = false) {
         }
     }
 }
-
